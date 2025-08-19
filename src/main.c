@@ -162,6 +162,22 @@ void main(void)
     uint16 var = 0;
     OLED_Driver_Set(OledMode_On);
     EMC1701_Driver_Turn(1);
+    
+    uint32 abc[6];
+    abc[0] = divU32byU16(0x12345678, 3);
+    abc[1] = divU32byU16(0x12345679, 3);
+    abc[2] = divU32byU16(0x1234567a, 3);
+    abc[3] = divU32byU16(0x12345678, 0xFFFF);
+    abc[4] = divU32byU16(0x12345678, 1);
+    abc[4] = divU32byU16(0x4fffc, 0xffff);
+    abc[5] = divU32byU16(0xfffefffe, 0xffff);
+    
+    int32 abc2[5];
+    abc2[0] = divS32byS16(-55, 5);
+    abc2[1] = divS32byS16(-55, -5);
+    abc2[2] = divS32byS16(55, 5);
+    abc2[3] = divS32byS16(55, -5);
+    
     while(1)
     {
         uint8 line[30];
@@ -175,7 +191,7 @@ void main(void)
             if(OLED_Driver_Running() != 0)
             {
                 uint8 len = 0;
-                uint16 current = DivisonU32byU16(EMC1701_Driver_GetResVolt(), 20u);
+                uint16 current = divS32byS16(EMC1701_Driver_GetResVolt(), 20000);
                 uint16 src_voltage = DivisonU32byU16(EMC1701_Driver_GetSrcVolt(), 10u);
                 
                 /* adding src voltage */

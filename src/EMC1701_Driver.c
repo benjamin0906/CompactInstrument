@@ -1,5 +1,6 @@
 #include "EMC1701_Driver_regdef.h"
 #include "I2C.h"
+#include "AsmFunctions.h"
 
 typedef enum eEmcStates
 {
@@ -95,7 +96,7 @@ void EMC1701_Driver_Runnable(void)
                     int16 t = (int16)(((uint16)data[0]) << 8);
                     t |= (uint16)data[1];
                     t >>= 4;
-                    ResistorVoltage = ((int32)FscRange * 1000 * t) / 2047; //uV
+                    ResistorVoltage = divS32byS16((int32)FscRange * 1000000, 2047) * t; //uV
                     substate = 1;
                 }
                     break;

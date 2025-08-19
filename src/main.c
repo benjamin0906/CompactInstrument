@@ -191,7 +191,7 @@ void main(void)
             if(OLED_Driver_Running() != 0)
             {
                 uint8 len = 0;
-                uint16 current = divS32byS16(EMC1701_Driver_GetResVolt(), 20000);
+                uint16 current = divS32byS16(EMC1701_Driver_GetResVolt(), 2000);
                 uint16 src_voltage = DivisonU32byU16(EMC1701_Driver_GetSrcVolt(), 10u);
                 
                 /* adding src voltage */
@@ -206,6 +206,8 @@ void main(void)
                 /* adding res voltage */
                 Dabler8Bit(current, &line[len]);
                 len += ExtendString(&line[len], '0', 5);
+                InsertChar(&line[0], ',', len-1);
+                len++;
                 line[len++] = ' ';
                 line[len++] = 'm';
                 line[len++] = 'A';

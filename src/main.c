@@ -206,6 +206,11 @@ void main(void)
                 /* adding res voltage */
                 Dabler8Bit(current, &line[len]);
                 len += ExtendString(&line[len], '0', 5);
+                line[len++] = ' ';
+                line[len++] = 'm';
+                line[len++] = 'A';
+                line[len++] = ' ';
+                len += Dabler8Bit(EMC1701_Driver_GetRange(), &line[len]);
                 line[len++] = '\n';
                 
                 Dabler8Bit(var, &line[len]);

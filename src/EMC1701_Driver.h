@@ -10,6 +10,7 @@
 
 extern int32 EMC1701_Driver_GetResVolt(void);
 extern uint32 EMC1701_Driver_GetSrcVolt(void);
+extern uint8 EMC1701_Driver_GetRange(void);
 
 #endif	/* EMC1701_DRIVER_H */
 

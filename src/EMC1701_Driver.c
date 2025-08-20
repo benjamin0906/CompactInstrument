@@ -212,10 +212,15 @@ void EMC1701_Driver_Runnable(void)
         case EmcState_RangeCheck:
         {
             uint32 tFsc = FscRange * 100000;
+            int32 abs_res_volt = ResistorVoltage;
+            if(abs_res_volt < 8)
+            {
+                abs_res_volt = abs_res_volt * (-1);
+            }
             reg = 0x51;
             desc.data_ptr = &Reg51h.U;
             desc.read_transmission = 0;
-            if(ResistorVoltage < (tFsc * 4))
+            if(abs_res_volt < (tFsc * 4))
             {
                 if(rangeCntr < 5u)
                 {
@@ -238,7 +243,7 @@ void EMC1701_Driver_Runnable(void)
                     rangeCntr = 0;
                 }
             }
-            if(ResistorVoltage > (tFsc * 9))
+            if(abs_res_volt > (tFsc * 9))
             {
                 if(rangeCntr > -5)
                 {

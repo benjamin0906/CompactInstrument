@@ -65,11 +65,17 @@ static const uint8 digit_S[5] = {0x46, 0x49, 0x49, 0x49, 0x31};
 static const uint8 digit_U[5] = {0x3F, 0x40, 0x40, 0x40, 0x3F};
 static const uint8 digit_V[5] = {0x1F, 0x20, 0x40, 0x20, 0x1F};
 static const uint8 digit_W[5] = {0x7F, 0x20, 0x18, 0x20, 0x7F};
+static const uint8 digit_a[5] = {0x20, 0x54, 0x54, 0x54, 0x78};
+static const uint8 digit_e[5] = {0x38, 0x54, 0x54, 0x54, 0x18};
+static const uint8 digit_g[5] = {0x18, 0xA4, 0xA4, 0xA4, 0x7C};
 static const uint8 digit_m[5] = {0x7C, 0x04, 0x78, 0x04, 0x7C};
+static const uint8 digit_n[5] = {0x7C, 0x08, 0x04, 0x04, 0x78};
 static const uint8 digit_Space[5] = {0x00, 0x00, 0x00, 0x00, 0x00};
 static const uint8 digit_Comma[5] = {0x00, 0xA0, 0x60, 0x00, 0x00};
+static const uint8 digit_Hyphen[5] = {0x00, 0x10, 0x10, 0x10, 0x00};
+static const uint8 digit_Colon[5] = {0x00, 0x6C, 0x6C, 0x00, 0x00};
 
-static dtCharDef CharacterBuff[21] = {  {.code = 48, .pixels = digit_0},
+static dtCharDef CharacterBuff[27] = {  {.code = 48, .pixels = digit_0},
                                         {.code = 49, .pixels = digit_1},
                                         {.code = 50, .pixels = digit_2},
                                         {.code = 51, .pixels = digit_3},
@@ -87,9 +93,15 @@ static dtCharDef CharacterBuff[21] = {  {.code = 48, .pixels = digit_0},
                                         {.code = 'U', .pixels = digit_U},
                                         {.code = 'V', .pixels = digit_V},
                                         {.code = 'W', .pixels = digit_W},
+                                        {.code = 'a', .pixels = digit_a},
+                                        {.code = 'e', .pixels = digit_e},
+                                        {.code = 'g', .pixels = digit_g},
                                         {.code = 'm', .pixels = digit_m},
+                                        {.code = 'n', .pixels = digit_n},
                                         {.code = ' ', .pixels = digit_Space},
                                         {.code = ',', .pixels = digit_Comma},
+                                        {.code = ':', .pixels = digit_Colon},
+                                        {.code = '-', .pixels = digit_Hyphen},
 };
 
 void Send(uint8 *data, uint16 len, uint8 dc)

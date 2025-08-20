@@ -163,36 +163,49 @@ void main(void)
     OLED_Driver_Set(OledMode_On);
     EMC1701_Driver_Turn(1);
     
-    uint32 abc[6];
-    abc[0] = divU32byU16(0x12345678, 3);
-    abc[1] = divU32byU16(0x12345679, 3);
-    abc[2] = divU32byU16(0x1234567a, 3);
-    abc[3] = divU32byU16(0x12345678, 0xFFFF);
-    abc[4] = divU32byU16(0x12345678, 1);
-    abc[4] = divU32byU16(0x4fffc, 0xffff);
-    abc[5] = divU32byU16(0xfffefffe, 0xffff);
-    
-    int32 abc2[5];
-    abc2[0] = divS32byS16(-55, 5);
-    abc2[1] = divS32byS16(-55, -5);
-    abc2[2] = divS32byS16(55, 5);
-    abc2[3] = divS32byS16(55, -5);
+    int32 avg_res_volt_buff[10] = {0,0,0,0,0,0,0,0,0,0};
     
     while(1)
     {
-        uint8 line[30];
+        uint8 line[50];
         OLED_Driver_Runnable();
         EMC1701_Driver_Runnable();
         if(TimePassed(ts, 50) != 0)
         {
+            int32 avg_res_volt = 0;
+            uint8 t = 0;
             ts = SysTime();
             Ports_SetPin(Port_B_2, var & 1);
             var++;
+            memcpy_inverse(&avg_res_volt_buff[0], &avg_res_volt_buff[1], sizeof(avg_res_volt_buff) - sizeof(avg_res_volt_buff[0]));
+            avg_res_volt_buff[0] = EMC1701_Driver_GetResVolt();
+            
+            avg_res_volt = 0;
+            for(t = 0; t < (sizeof(avg_res_volt_buff)/sizeof(avg_res_volt_buff[0])); t++)
+            {
+                avg_res_volt += avg_res_volt_buff[t];
+            }
+            avg_res_volt = divS32byS16(avg_res_volt, (sizeof(avg_res_volt_buff)/sizeof(avg_res_volt_buff[0])));
+            
             if(OLED_Driver_Running() != 0)
             {
                 uint8 len = 0;
-                uint16 current = divS32byS16(EMC1701_Driver_GetResVolt(), 2000);
+                uint8 t = 0;
+                int16 current = divS32byS16(EMC1701_Driver_GetResVolt(), 2000);
+                int16 avg_current = divS32byS16(avg_res_volt, 2000);
                 uint16 src_voltage = DivisonU32byU16(EMC1701_Driver_GetSrcVolt(), 10u);
+                
+                line[len++] = 'R';
+                line[len++] = 'a';
+                line[len++] = 'n';
+                line[len++] = 'g';
+                line[len++] = 'e';
+                line[len++] = ':';
+                len += Dabler8Bit(EMC1701_Driver_GetRange(), &line[len]);
+                line[len++] = ' ';
+                line[len++] = 'm';
+                line[len++] = 'V';
+                line[len++] = '\n';
                 
                 /* adding src voltage */
                 Dabler8Bit(src_voltage, &line[len]);
@@ -204,15 +217,46 @@ void main(void)
                 line[len++] = '\n';
                 
                 /* adding res voltage */
-                Dabler8Bit(current, &line[len]);
-                len += ExtendString(&line[len], '0', 5);
+                if(current < 0)
+                {
+                    line[len++] = '-';
+                    current *= -1;
+                }
+                t = Dabler8Bit(current, &line[len]);
+                if(t == 1)
+                {
+                    len += ExtendString(&line[len], '0', 2);
+                }
+                else
+                {
+                    len += t;
+                }
+                
                 InsertChar(&line[0], ',', len-1);
                 len++;
                 line[len++] = ' ';
                 line[len++] = 'm';
                 line[len++] = 'A';
                 line[len++] = ' ';
-                len += Dabler8Bit(EMC1701_Driver_GetRange(), &line[len]);
+                if(avg_current < 0)
+                {
+                    line[len++] = '-';
+                    avg_current *= -1;
+                }
+                t = Dabler8Bit(avg_current, &line[len]);
+                if(t == 1)
+                {
+                    len += ExtendString(&line[len], '0', 2);
+                }
+                else
+                {
+                    len += t;
+                }
+                InsertChar(&line[0], ',', len-1);
+                len++;
+                line[len++] = ' ';
+                line[len++] = 'm';
+                line[len++] = 'A';
                 line[len++] = '\n';
                 
                 Dabler8Bit(var, &line[len]);

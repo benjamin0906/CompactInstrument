@@ -16,5 +16,7 @@ extern uint16 strlen(uint8 *string);
 extern uint32 divU32byU16(uint32 dividend, uint16 divisor);
 extern int32 divS32byS16(int32 dividend, int16 divisor);
 
+extern uint8 Dabler16Bit(uint16 value, uint8 *Digits);
+
 #endif	/* ASMFUNCTIONS_H */
 

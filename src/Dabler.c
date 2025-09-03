@@ -1,6 +1,6 @@
 #include "types.h"
 
-uint8 Dabler8Bit(uint8 value, uint8 *Digits)
+uint8 Dabler16Bit(uint16 value, uint8 *Digits)
 {
 asm(
     "CP0 W1\n"
@@ -132,7 +132,7 @@ asm(
 );
 }
 
-uint8 Dabler16Bit(uint16 value, uint8 *Digits)
+/*uint8 Dabler16Bit(uint16 value, uint8 *Digits)
 {
     uint32 bcd = 0;
     uint8 DigitNum = 8;
@@ -212,4 +212,4 @@ uint8 Dabler16Bit(uint16 value, uint8 *Digits)
     } while(DigitNum != 0);
     Digits[looper] = 0;
     return looper;
-}
+}*/

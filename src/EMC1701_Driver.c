@@ -213,7 +213,8 @@ void EMC1701_Driver_Runnable(void)
         {
             uint32 tFsc = FscRange * 100000;
             int32 abs_res_volt = ResistorVoltage;
-            if(abs_res_volt < 8)
+            dtReg51h prevReg51 = Reg51h;
+            if(abs_res_volt < 0)
             {
                 abs_res_volt = abs_res_volt * (-1);
             }
@@ -232,13 +233,6 @@ void EMC1701_Driver_Runnable(void)
                     {
                         Reg51h.B.CS_RANGE--;
                         FscRange >>= 1;
-                        I2C_Transmission(&desc);
-                        EmcState = EmcState_WaitForComm;
-                        EmcAfterWaitState = EmcState_Running_WaitState;
-                    }
-                    else
-                    {
-                        EmcState = EmcState_Running_WaitState;
                     }
                     rangeCntr = 0;
                 }
@@ -255,16 +249,16 @@ void EMC1701_Driver_Runnable(void)
                     {
                         Reg51h.B.CS_RANGE++;
                         FscRange <<= 1;
-                        I2C_Transmission(&desc);
-                        EmcState = EmcState_WaitForComm;
-                        EmcAfterWaitState = EmcState_Running_WaitState;
-                    }
-                    else 
-                    {
-                        EmcState = EmcState_Running_WaitState;
                     }
                     rangeCntr = 0;
                 }
+            }
+            EmcState = EmcState_Running_WaitState;
+            if(prevReg51.U != Reg51h.U)
+            {
+                I2C_Transmission(&desc);
+                EmcState = EmcState_WaitForComm;
+                EmcAfterWaitState = EmcState_Running_WaitState;
             }
         }
             break;

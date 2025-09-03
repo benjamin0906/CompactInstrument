@@ -174,11 +174,12 @@ void main(void)
         {
             int32 avg_res_volt = 0;
             uint8 t = 0;
+            int32 resistorVoltage = EMC1701_Driver_GetResVolt();
             ts = SysTime();
             Ports_SetPin(Port_B_2, var & 1);
             var++;
             memcpy_inverse(&avg_res_volt_buff[0], &avg_res_volt_buff[1], sizeof(avg_res_volt_buff) - sizeof(avg_res_volt_buff[0]));
-            avg_res_volt_buff[0] = EMC1701_Driver_GetResVolt();
+            avg_res_volt_buff[0] = resistorVoltage;
             
             avg_res_volt = 0;
             for(t = 0; t < (sizeof(avg_res_volt_buff)/sizeof(avg_res_volt_buff[0])); t++)
@@ -191,8 +192,8 @@ void main(void)
             {
                 uint8 len = 0;
                 uint8 t = 0;
-                int16 current = divS32byS16(EMC1701_Driver_GetResVolt(), 2000);
-                int16 avg_current = divS32byS16(avg_res_volt, 2000);
+                int32 current = divS32byS16(resistorVoltage, 2000);
+                int32 avg_current = divS32byS16(avg_res_volt, 2000);
                 uint16 src_voltage = DivisonU32byU16(EMC1701_Driver_GetSrcVolt(), 10u);
                 
                 line[len++] = 'R';
@@ -201,14 +202,14 @@ void main(void)
                 line[len++] = 'g';
                 line[len++] = 'e';
                 line[len++] = ':';
-                len += Dabler8Bit(EMC1701_Driver_GetRange(), &line[len]);
+                len += Dabler16Bit(EMC1701_Driver_GetRange(), &line[len]);
                 line[len++] = ' ';
                 line[len++] = 'm';
                 line[len++] = 'V';
                 line[len++] = '\n';
                 
                 /* adding src voltage */
-                Dabler8Bit(src_voltage, &line[len]);
+                Dabler16Bit(src_voltage, &line[len]);
                 len += ExtendString(&line[len], '0', 5);
                 InsertChar(line, ',', len-3);
                 len++;
@@ -222,7 +223,7 @@ void main(void)
                     line[len++] = '-';
                     current *= -1;
                 }
-                t = Dabler8Bit(current, &line[len]);
+                t = Dabler16Bit(current, &line[len]);
                 if(t == 1)
                 {
                     len += ExtendString(&line[len], '0', 2);
@@ -243,7 +244,7 @@ void main(void)
                     line[len++] = '-';
                     avg_current *= -1;
                 }
-                t = Dabler8Bit(avg_current, &line[len]);
+                t = Dabler16Bit(avg_current, &line[len]);
                 if(t == 1)
                 {
                     len += ExtendString(&line[len], '0', 2);
@@ -259,7 +260,7 @@ void main(void)
                 line[len++] = 'A';
                 line[len++] = '\n';
                 
-                Dabler8Bit(var, &line[len]);
+                Dabler16Bit(var, &line[len]);
                 len += ExtendString(&line[len], '0', 6);
                 line[len++] = 0;
                 OLED_Driver_PutString(line);

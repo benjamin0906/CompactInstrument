@@ -223,7 +223,7 @@ void EMC1701_Driver_Runnable(void)
             desc.read_transmission = 0;
             if(abs_res_volt < (tFsc * 4))
             {
-                if(rangeCntr < 5u)
+                if(rangeCntr < 20u)
                 {
                     rangeCntr++;
                 }
@@ -239,7 +239,7 @@ void EMC1701_Driver_Runnable(void)
             }
             if(abs_res_volt > (tFsc * 9))
             {
-                if(rangeCntr > -5)
+                if(rangeCntr > -20)
                 {
                     rangeCntr--;
                 }

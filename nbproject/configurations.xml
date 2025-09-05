@@ -46,6 +46,7 @@
       <itemPath>src/EMC1701_Driver.h</itemPath>
       <itemPath>src/AsmFunctions.s</itemPath>
       <itemPath>src/AsmFunctions.h</itemPath>
+      <itemPath>src/main.h</itemPath>
     </logicalFolder>
   </logicalFolder>
   <projectmakefile>Makefile</projectmakefile>
@@ -221,6 +222,9 @@
         <property key="relaxed-math" value="false"/>
         <property key="save-temps" value="true"/>
       </C30Global>
+      <PICkit3PlatformTool>
+        <property key="firmware.download.all" value="false"/>
+      </PICkit3PlatformTool>
       <Tool>
         <property key="ADC" value="true"/>
         <property key="AutoSelectMemRanges" value="auto"/>

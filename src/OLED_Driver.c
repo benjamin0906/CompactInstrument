@@ -1,13 +1,11 @@
 #include "OLED_Driver.h"
 #include "SPI.h"
 #include "Ports.h"
+#include "main.h"
 
 #define PIN_RES Port_B_14
 #define PIN_DC Port_A_4
 #define PIN_CS Port_A_3
-
-extern uint16 SysTime(void);
-extern uint8 TimePassed(uint16 timestamp, uint16 timeout);
 
 typedef enum eOledState
 {
@@ -35,18 +33,7 @@ static dtOledMode Mode;
 static uint16 Timestamp;
 static uint8 dataBuffer[8][128];
 static uint16 Timestamp;
-static uint16 testCo;
 
-/*static const uint8 digit_0[5] = {0x7E, 0x91, 0x89, 0x85, 0x7E};
-static const uint8 digit_1[5] = {0x84, 0x82, 0xFF, 0x80, 0x80};
-static const uint8 digit_2[5] = {0xC2, 0xA1, 0x91, 0x89, 0x86};
-static const uint8 digit_3[5] = {0x42, 0x81, 0x81, 0x91, 0x7E};
-static const uint8 digit_4[5] = {0x18, 0x14, 0x12, 0xFF, 0x10};
-static const uint8 digit_5[5] = {0x4F, 0x89, 0x89, 0x89, 0x71};
-static const uint8 digit_6[5] = {0x7E, 0x91, 0x91, 0x91, 0x62};
-static const uint8 digit_7[5] = {0x81, 0x61, 0x19, 0x05, 0x03};
-static const uint8 digit_8[5] = {0x76, 0x89, 0x89, 0x89, 0x76};
-static const uint8 digit_9[5] = {0x4E, 0x91, 0x91, 0x91, 0x7E};*/
 static const uint8 digit_0[5] = {0x3E, 0x51, 0x49, 0x45, 0x3E};
 static const uint8 digit_1[5] = {0x44, 0x42, 0x7F, 0x40, 0x40};
 static const uint8 digit_2[5] = {0x42, 0x61, 0x51, 0x49, 0x46};
@@ -104,6 +91,13 @@ static dtCharDef CharacterBuff[27] = {  {.code = 48, .pixels = digit_0},
                                         {.code = '-', .pixels = digit_Hyphen},
 };
 
+void Send(uint8 *data, uint16 len, uint8 dc);
+void OLED_Driver_PutString(uint8 *string);
+void OLED_Driver_CopyArrayToBuf(uint8 row, uint8 column, const uint8 *const array, uint8 array_width, uint8 array_height);
+void OLED_Driver_Runnable(void);
+void OLED_Driver_Set(dtOledMode mode);
+uint8 OLED_Driver_Running(void);
+
 void Send(uint8 *data, uint16 len, uint8 dc)
 {
     dtSpiTrDesc transfer = {.rx_buff = 0, .tx_buff = data, .length = len};
@@ -147,10 +141,9 @@ void OLED_Driver_PutString(uint8 *string)
     }
 }
 
-void OLED_Driver_CopyArrayToBuf(uint8 row, uint8 column, uint8 *array, uint8 array_width, uint8 array_height)
+void OLED_Driver_CopyArrayToBuf(uint8 row, uint8 column, const uint8 *const array, uint8 array_width, uint8 array_height)
 {
     uint8 x = 0;
-    uint8 base_row_index = row / 8;
     
     uint8 array_y = 0;
     while((array_y < array_height) && (row < 63))
@@ -239,30 +232,6 @@ void OLED_Driver_Runnable(void)
             if(TimePassed(Timestamp, 10) != 0)
             {
                 Timestamp = SysTime();
-                uint16 len = sizeof(dataBuffer);
-                /*do
-                {
-                    len--;
-                    ((uint8*)(&dataBuffer[0][0]))[len] = 0;
-                }while(len != 0);
-                OLED_Driver_CopyArrayToBuf(0, 0, digit_0, 5,8);
-                OLED_Driver_CopyArrayToBuf(1, 8, digit_1, 5,8);
-                OLED_Driver_CopyArrayToBuf(2, 16, digit_2, 5,8);
-                OLED_Driver_CopyArrayToBuf(3, 24, digit_3, 5,8);
-                OLED_Driver_CopyArrayToBuf(4, 32, digit_4, 5,8);
-                OLED_Driver_CopyArrayToBuf(5, 40, digit_5, 5,8);
-                OLED_Driver_CopyArrayToBuf(6, 48, digit_6, 5,8);
-                OLED_Driver_CopyArrayToBuf(7, 56, digit_7, 5,8);
-                OLED_Driver_CopyArrayToBuf(8, 64, digit_8, 5,8);
-                OLED_Driver_CopyArrayToBuf(9, 72, digit_9, 5,8);
-                OLED_Driver_CopyArrayToBuf(10, 0, digit_A, 5,8);
-                OLED_Driver_CopyArrayToBuf(11, 8, digit_I, 5,8);
-                OLED_Driver_CopyArrayToBuf(12, 16, digit_U, 5,8);
-                OLED_Driver_CopyArrayToBuf(13, 24, digit_P, 5,8);
-                OLED_Driver_CopyArrayToBuf(14, 32, digit_V, 5,8);
-                OLED_Driver_CopyArrayToBuf(15, 40, digit_W, 5,8);*/
-                testCo++;
-                
                 Send(&dataBuffer[0][0], sizeof(dataBuffer), 1);
             }
             break;

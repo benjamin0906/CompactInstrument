@@ -7,8 +7,12 @@
             <file>file:/C:/Users/Benjamin/MPLABXProjects/CompactInstrument.X/src/OLED_Driver.c</file>
             <file>file:/C:/Users/Benjamin/MPLABXProjects/CompactInstrument.X/src/EMC1701_Driver.c</file>
             <file>file:/C:/Users/Benjamin/MPLABXProjects/CompactInstrument.X/src/EMC1701_Driver.h</file>
+            <file>file:/C:/Users/Benjamin/MPLABXProjects/CompactInstrument.X/src/AsmFunctions.s</file>
+            <file>file:/C:/Users/Benjamin/MPLABXProjects/CompactInstrument.X/src/EMC1701_Driver_regdef.h</file>
             <file>file:/C:/Users/Benjamin/MPLABXProjects/CompactInstrument.X/src/Dabler.c</file>
             <file>file:/C:/Users/Benjamin/MPLABXProjects/CompactInstrument.X/src/I2C.c</file>
+            <file>file:/C:/Users/Benjamin/MPLABXProjects/CompactInstrument.X/src/OLED_Driver.h</file>
+            <file>file:/C:/Users/Benjamin/MPLABXProjects/CompactInstrument.X/src/AsmFunctions.h</file>
         </group>
     </open-files>
 </project-private>

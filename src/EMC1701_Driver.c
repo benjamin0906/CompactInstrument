@@ -1,6 +1,7 @@
 #include "EMC1701_Driver_regdef.h"
 #include "I2C.h"
 #include "AsmFunctions.h"
+#include "main.h"
 
 typedef enum eEmcStates
 {
@@ -11,7 +12,6 @@ typedef enum eEmcStates
             EmcState_Init_Curr_Cfg,
             EmcState_Init_Config,
             EmcState_Running_WaitState,
-            EmcState_Running_ProcState,
             EmcState_Running_ReadResistor,
             EmcState_Running_ProcRes,
             EmcState_Running_ReadSource,
@@ -54,17 +54,14 @@ typedef union uReg51h
 
 static uint8 FscRange = 80;
 static int8 rangeCntr;
-static uint8 increaseCntr;
 static dtEmcStates EmcState;
 static dtEmcStates EmcAfterWaitState;
 static int32 ResistorVoltage;
 static uint32 SourceVoltage;
-static uint8 substate;
 static uint8 data[2];
 static uint8 reg;
 dtI2cTrDesc desc;
 static dtReg51h Reg51h;
-static dtReg02h Reg02h;
 static uint16 Timestamp;
 
 void EMC1701_Driver_Runnable(void)

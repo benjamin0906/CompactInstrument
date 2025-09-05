@@ -152,6 +152,7 @@ void __attribute__ ((interrupt, no_auto_psv)) _MI2C2Interrupt(void)
                 State = I2CState_TransmissionDone;
             }
             break;
+        case I2CState_TransmissionDone:
         case Error:
             break;
     }

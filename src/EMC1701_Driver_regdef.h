@@ -57,7 +57,7 @@ typedef union u02hStatus
     uint8 U;
     int8 I;
     dt02hStatus_Bits B;
-};
+} dt02hStatus;
 
 #endif	/* EMC1701_DRIVER_REGDEF_H */
 

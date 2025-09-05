@@ -10,8 +10,6 @@ typedef enum eEmcStates
             EmcState_Init_ConfigRate,
             EmcState_Init_Curr_Cfg,
             EmcState_Init_Config,
-            EmcState_Running,
-            EmcState_Pocessing,
             EmcState_Running_WaitState,
             EmcState_Running_ProcState,
             EmcState_Running_ReadResistor,
@@ -113,56 +111,9 @@ void EMC1701_Driver_Runnable(void)
             desc.data_ptr = &data[0];
             I2C_Transmission(&desc);
             EmcState = EmcState_WaitForComm;
-            EmcAfterWaitState = EmcState_Running;
             EmcAfterWaitState = EmcState_Running_ReadResistor;
             desc.data_len = 2;
             desc.read_transmission = 1;
-            break;
-        case EmcState_Running:
-            desc.read_transmission = 1;
-            desc.data_ptr = &data[0];
-            switch(substate)
-            {
-                case 0:
-                    reg = 0x54;
-                    I2C_Transmission(&desc);
-                    EmcState = EmcState_WaitForComm;
-                    EmcAfterWaitState = EmcState_Pocessing;
-                    break;
-                case 1:
-                    reg = 0x58;
-                    I2C_Transmission(&desc);
-                    EmcState = EmcState_WaitForComm;
-                    EmcAfterWaitState = EmcState_Pocessing;
-                    break;
-            }
-            break;
-        case EmcState_Pocessing:
-            EmcState = EmcState_Running;
-            switch(substate)
-            {
-                case 0:
-                {
-                    int16 t = (int16)(((uint16)data[0]) << 8);
-                    t |= (uint16)data[1];
-                    t >>= 4;
-                    
-                    ResistorVoltage = divS32byS16((int32)FscRange * 1000000, 2047) * t; //uV
-                    substate = 1;
-                }
-                    break;
-                case 1:
-                {
-                    
-                    uint16 t = (uint16)data[0];
-                    t <<= 8;
-                    t |= (uint16)data[1];
-                    t >>= 5;
-                    SourceVoltage = ((uint32)t * 117); //100uV
-                    substate = 0;
-                }
-                    break;
-            }
             break;
         case EmcState_Running_WaitState:
             if(TimePassed(Timestamp, 10))
@@ -200,7 +151,6 @@ void EMC1701_Driver_Runnable(void)
             break;
         case EmcState_Running_ProcSource:
         {
-
             uint16 t = (uint16)data[0];
             t <<= 8;
             t |= (uint16)data[1];
@@ -285,7 +235,7 @@ void EMC1701_Driver_Turn(uint8 on)
 
 uint8 EMC1701_Driver_Running(void)
 {
-    return (EmcState == EmcState_Running) || ((EmcAfterWaitState == EmcState_Running) && (EmcState == EmcState_WaitForComm));
+    return  (EmcAfterWaitState >= EmcState_Running_WaitState) || (EmcState >= EmcState_Running_WaitState);
 }
 
 int32 EMC1701_Driver_GetResVolt(void)

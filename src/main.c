@@ -167,7 +167,7 @@ void main(void)
     
     while(1)
     {
-        uint8 line[50];
+        uint8 line[80];
         OLED_Driver_Runnable();
         EMC1701_Driver_Runnable();
         if(TimePassed(ts, 50) != 0)
@@ -195,6 +195,8 @@ void main(void)
                 int32 current = divS32byS16(resistorVoltage, 2000);
                 int32 avg_current = divS32byS16(avg_res_volt, 2000);
                 uint16 src_voltage = DivisonU32byU16(EMC1701_Driver_GetSrcVolt(), 10u);
+                int32 power = current * src_voltage;
+                power = DivisonU32byU16(power, 10000u);
                 
                 line[len++] = 'R';
                 line[len++] = 'a';
@@ -217,7 +219,7 @@ void main(void)
                 line[len++] = 'V';
                 line[len++] = '\n';
                 
-                /* adding res voltage */
+                /* adding current */
                 if(current < 0)
                 {
                     line[len++] = '-';
@@ -258,6 +260,27 @@ void main(void)
                 line[len++] = ' ';
                 line[len++] = 'm';
                 line[len++] = 'A';
+                line[len++] = '\n';
+                
+                /* adding power */
+                if(power < 0)
+                {
+                    line[len++] = '-';
+                    power *= -1;
+                }
+                t = Dabler16Bit(power, &line[len]);
+                if(t < 4)
+                {
+                    len += ExtendString(&line[len], '0', 4);
+                }
+                else
+                {
+                    len += t;
+                }
+                InsertChar(&line[0], ',', len-3);
+                len++;
+                line[len++] = ' ';
+                line[len++] = 'W';
                 line[len++] = '\n';
                 
                 Dabler16Bit(var, &line[len]);

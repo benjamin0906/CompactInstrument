@@ -56,7 +56,11 @@ static uint8 FscRange = 80;
 static int8 rangeCntr;
 static dtEmcStates EmcState;
 static dtEmcStates EmcAfterWaitState;
+
+/* Stores the voltage measured across the shunt resistor. Its dimension is in [nV] */
 static int32 ResistorVoltage;
+
+/* Holds the voltage measured at the input side. Its dimension is in [100uV] */
 static uint32 SourceVoltage;
 static uint8 data[2];
 static uint8 reg;

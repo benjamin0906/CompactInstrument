@@ -131,8 +131,8 @@ void main(void)
     OLED_Driver_Set(OledMode_On);
     EMC1701_Driver_Turn(1);
     
-    int32 avg_res_volt_buff[10] = {0,0,0,0,0,0,0,0,0,0};
-    uint32 avg_src_vol_buff[10] = {0,0,0,0,0,0,0,0,0,0};
+    int32 avg_res_volt_buff[20] = {0,0,0,0,0,0,0,0,0,0};
+    uint32 avg_src_vol_buff[20] = {0,0,0,0,0,0,0,0,0,0};
     
     while(1)
     {
@@ -172,12 +172,12 @@ void main(void)
             {
                 uint8 len = 0;
                 uint8 t = 0;
-                int32 current = divS32byS16toS32(resistorVoltage, 2000);
-                int32 avg_current = divS32byS16toS32(avg_res_volt, 2000);
-                uint16 src_voltage = divU32byU16toU16(EMC1701_Driver_GetSrcVolt(), 10u);
-                uint16 avg_src_voltage = divU32byU16toU16(avg_src_volt, 10u);
-                int32 power = current * src_voltage;
-                power = divS32byS16toS32(power, 10000u);
+                int32 current           = divS32byS16toS32(resistorVoltage, 2000);
+                int32 avg_current       = divS32byS16toS32(avg_res_volt, 2000);
+                uint16 src_voltage      = divU32byU16toU16(EMC1701_Driver_GetSrcVolt(), 10u);
+                uint16 avg_src_voltage  = divU32byU16toU16(avg_src_volt, 10u);
+                int32 power             = divS32byS16toS32(current * src_voltage, 10000u);
+                int32 avg_power         = divS32byS16toS32(avg_current * avg_src_voltage, 10000u);
                 
                 line[len++] = 'R';
                 line[len++] = 'a';
@@ -190,6 +190,7 @@ void main(void)
                 line[len++] = 'm';
                 line[len++] = 'V';
                 line[len++] = '\n';
+                line[len++] = '\n';
                 
                 /* adding src voltage */
                 Dabler16Bit(src_voltage, &line[len]);
@@ -199,6 +200,7 @@ void main(void)
                 line[len++] = ' ';
                 line[len++] = 'V';
                 line[len++] = ' ';
+                line[len++] = ' ';
                 
                 Dabler16Bit(avg_src_voltage, &line[len]);
                 len += ExtendString(&line[len], '0', 5);
@@ -207,6 +209,7 @@ void main(void)
                 line[len++] = ' ';
                 line[len++] = 'V';
                 
+                line[len++] = '\n';
                 line[len++] = '\n';
                 
                 /* adding current */
@@ -231,6 +234,7 @@ void main(void)
                 line[len++] = 'm';
                 line[len++] = 'A';
                 line[len++] = ' ';
+                line[len++] = ' ';
                 if(avg_current < 0)
                 {
                     line[len++] = '-';
@@ -250,6 +254,7 @@ void main(void)
                 line[len++] = ' ';
                 line[len++] = 'm';
                 line[len++] = 'A';
+                line[len++] = '\n';
                 line[len++] = '\n';
                 
                 /* adding power */
@@ -271,6 +276,29 @@ void main(void)
                 len++;
                 line[len++] = ' ';
                 line[len++] = 'W';
+                
+                /* adding wverage power */
+                line[len++] = ' ';
+                line[len++] = ' ';
+                if(avg_power < 0)
+                {
+                    line[len++] = '-';
+                    avg_power *= -1;
+                }
+                t = Dabler16Bit(avg_power, &line[len]);
+                if(t < 4)
+                {
+                    len += ExtendString(&line[len], '0', 4);
+                }
+                else
+                {
+                    len += t;
+                }
+                InsertChar(&line[0], ',', len-3);
+                len++;
+                line[len++] = ' ';
+                line[len++] = 'W';
+                line[len++] = '\n';
                 line[len++] = '\n';
                 
                 Dabler16Bit(var, &line[len]);

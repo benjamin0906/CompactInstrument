@@ -39,6 +39,19 @@
 #pragma config JTAGEN = OFF             // JTAG Enable bit (JTAG is disabled)
 #pragma config BTSWP = OFF
 
+typedef enum eMainStates
+{
+    MainState_Init_Off,
+            MainState_Init_MeasureOffset,
+            MainState_Init_On,
+            MainState_Measuring,
+} dtMainStates;
+
+#define AVG_VALUES_POSITION 12
+#define SENSE_ENABLE    Port_A_0
+#define BUTTON_LEFT     Port_A_1
+#define BUTTON_RIGHT    Port_B_1
+
 uint16 SysCntr;
 
 void __attribute__ ((interrupt, no_auto_psv)) _T1Interrupt(void)
@@ -91,6 +104,7 @@ void main(void)
     dtT1Cfg T1cfg = {.Cmp = 8749, .ExtClock = 0, .On = 1, .Prescaler = 1};
     dtPllCfg PllCfg = {.M = 74, .N1 = 0, .N2 = 0, .OscSel = 1};
     dtSpiCfg SpiCfg = {.bits_16 = 0, .cpha = 1, .cpol = 0, .instance = 0, .pri_prescaler = 3, .sec_prescaler = 1};
+    dtMainStates MainState = MainState_Init_Off;
     
     SRC_PllConfig(PllCfg);
     T1_Init(T1cfg);
@@ -100,7 +114,7 @@ void main(void)
     Ports_SetPin(Port_B_8, 0);
     Ports_SetPin(Port_B_15, 1);
     
-    Ports_SetMode(Port_B_3, Port_DO);
+    Ports_SetMode(Port_B_11, Port_DO);
     Ports_SetMode(Port_B_2, Port_DO);
     
     Ports_SetMode(Port_B_14, Port_DO);
@@ -110,6 +124,7 @@ void main(void)
     Ports_SetMode(Port_B_12, Port_DO);
     Ports_SetMode(Port_B_13, Port_DO);
     Ports_SetMode(Port_B_14, Port_DO);
+    Ports_SetMode(SENSE_ENABLE, Port_DO);
     Ports_ConfigOutputSelection(44, Ports_OutFun_SCK1);
     Ports_ConfigInputSelection(44, Ports_InFun_SCK1IN);
     Ports_ConfigOutputSelection(45, Ports_OutFun_SDO1);
@@ -133,6 +148,8 @@ void main(void)
     
     int32 avg_res_volt_buff[20] = {0,0,0,0,0,0,0,0,0,0};
     uint32 avg_src_vol_buff[20] = {0,0,0,0,0,0,0,0,0,0};
+    int32 res_volt_offset = 0;
+    uint32 src_volt_offset = 0;
     
     while(1)
     {
@@ -147,6 +164,7 @@ void main(void)
             int32 resistorVoltage = EMC1701_Driver_GetResVolt();
             ts = SysTime();
             Ports_SetPin(Port_B_2, var & 1);
+            Ports_SetPin(Port_B_11, var & 2);
             var++;
             
             memcpy_inverse(&avg_res_volt_buff[0], &avg_res_volt_buff[1], sizeof(avg_res_volt_buff) - sizeof(avg_res_volt_buff[0]));
@@ -168,9 +186,36 @@ void main(void)
             }
             avg_src_volt = divS32byS16toS32(avg_src_volt, (sizeof(avg_src_vol_buff)/sizeof(avg_src_vol_buff[0])));
             
+            switch(MainState)
+            {
+                case MainState_Init_Off:
+                    Ports_SetPin(SENSE_ENABLE, 0);
+                    MainState = MainState_Init_MeasureOffset;
+                    break;
+                case MainState_Init_MeasureOffset:
+                    if(var >= 200)
+                    {
+                        res_volt_offset = avg_res_volt;
+                        src_volt_offset = avg_src_volt;
+                        MainState = MainState_Init_On;
+                    }
+                    break;
+                case MainState_Init_On:
+                    Ports_SetPin(SENSE_ENABLE, 1);
+                    MainState = MainState_Measuring;
+                    break;
+                case MainState_Measuring:
+                    resistorVoltage -= res_volt_offset;
+                    avg_res_volt -= res_volt_offset;
+                    avg_src_volt -= src_volt_offset;
+                    break;
+            }
+            
             if(OLED_Driver_Running() != 0)
             {
                 uint8 len = 0;
+                uint8 tab_cntr = 0;
+                uint8 last_lf_pos = 0;
                 uint8 t = 0;
                 int32 current           = divS32byS16toS32(resistorVoltage, 2000);
                 int32 avg_current       = divS32byS16toS32(avg_res_volt, 2000);
@@ -191,16 +236,19 @@ void main(void)
                 line[len++] = 'V';
                 line[len++] = '\n';
                 line[len++] = '\n';
+                last_lf_pos = len-1;
                 
                 /* adding src voltage */
-                Dabler16Bit(src_voltage, &line[len]);
+                Dabler16Bit(src_voltage-src_volt_offset, &line[len]);
                 len += ExtendString(&line[len], '0', 5);
                 InsertChar(line, ',', len-3);
                 len++;
                 line[len++] = ' ';
                 line[len++] = 'V';
-                line[len++] = ' ';
-                line[len++] = ' ';
+                while(len < (last_lf_pos + AVG_VALUES_POSITION))
+                {
+                    line[len++] = ' ';
+                }
                 
                 Dabler16Bit(avg_src_voltage, &line[len]);
                 len += ExtendString(&line[len], '0', 5);
@@ -211,6 +259,7 @@ void main(void)
                 
                 line[len++] = '\n';
                 line[len++] = '\n';
+                last_lf_pos = len-1;
                 
                 /* adding current */
                 if(current < 0)
@@ -233,8 +282,10 @@ void main(void)
                 line[len++] = ' ';
                 line[len++] = 'm';
                 line[len++] = 'A';
-                line[len++] = ' ';
-                line[len++] = ' ';
+                while(len < (last_lf_pos + AVG_VALUES_POSITION))
+                {
+                    line[len++] = ' ';
+                }
                 if(avg_current < 0)
                 {
                     line[len++] = '-';
@@ -256,6 +307,7 @@ void main(void)
                 line[len++] = 'A';
                 line[len++] = '\n';
                 line[len++] = '\n';
+                last_lf_pos = len-1;
                 
                 /* adding power */
                 if(power < 0)
@@ -277,9 +329,11 @@ void main(void)
                 line[len++] = ' ';
                 line[len++] = 'W';
                 
-                /* adding wverage power */
-                line[len++] = ' ';
-                line[len++] = ' ';
+                /* adding average power */
+                while(len < (last_lf_pos + AVG_VALUES_POSITION))
+                {
+                    line[len++] = ' ';
+                }
                 if(avg_power < 0)
                 {
                     line[len++] = '-';

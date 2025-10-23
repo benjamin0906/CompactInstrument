@@ -46,6 +46,8 @@
       <itemPath>src/AsmFunctions.s</itemPath>
       <itemPath>src/AsmFunctions.h</itemPath>
       <itemPath>src/main.h</itemPath>
+      <itemPath>src/DisplayLayout.c</itemPath>
+      <itemPath>src/DisplayLayout.h</itemPath>
     </logicalFolder>
   </logicalFolder>
   <projectmakefile>Makefile</projectmakefile>

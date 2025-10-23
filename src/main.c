@@ -19,6 +19,7 @@
 #include "SPI.h"
 #include "EMC1701_Driver.h"
 #include "AsmFunctions.h"
+#include "DisplayLayout.h"
 
 #pragma config FNOSC = FRC              // Oscillator Source Selection (Internal Fast RC (FRC))
 #pragma config IESO = OFF               // Two-speed Oscillator Start-up Enable bit (Start up with user-selected oscillator source)
@@ -47,7 +48,6 @@ typedef enum eMainStates
             MainState_Measuring,
 } dtMainStates;
 
-#define AVG_VALUES_POSITION 12
 #define SENSE_ENABLE    Port_A_0
 #define BUTTON_LEFT     Port_A_1
 #define BUTTON_RIGHT    Port_B_1
@@ -75,27 +75,6 @@ uint8 TimePassed(uint16 timestamp, uint16 timeout)
     {
         return 0;
     }
-}
-
-uint8 ExtendString(uint8 *string, uint8 extChar, uint8 toLength)
-{
-    uint8 len = strlen(string);
-    if(len < toLength)
-    {
-        memcpy_inverse(&string[0], &string[toLength - len], len);
-        memset(&string[0], extChar, toLength - len);
-        len = toLength;
-        string[len] = 0;
-    }
-    return len;
-}
-
-void InsertChar(uint8 *string, uint8 character, uint8 position)
-{
-    uint8 len = strlen(string) + 1;
-    if(len > position)
-    memcpy_inverse(&string[position], &string[position + 1], len - position);
-    string[position] = character;
 }
 
 void main(void)
@@ -142,7 +121,7 @@ void main(void)
     //OLED_Driver_Init();
     while(TimePassed(ts, 200) == 0);
     
-    uint16 var = 0;
+    uint8 var = 0;
     OLED_Driver_Set(OledMode_On);
     EMC1701_Driver_Turn(1);
     
@@ -153,25 +132,25 @@ void main(void)
     
     while(1)
     {
-        uint8 line[80];
         OLED_Driver_Runnable();
         EMC1701_Driver_Runnable();
         if(TimePassed(ts, 50) != 0)
         {
             int32 avg_res_volt = 0;
             uint32 avg_src_volt = 0;
+            int32 curr_res_volt = EMC1701_Driver_GetResVolt();
+            uint32 curr_src_volt = EMC1701_Driver_GetSrcVolt();
             uint8 t = 0;
-            int32 resistorVoltage = EMC1701_Driver_GetResVolt();
             ts = SysTime();
             Ports_SetPin(Port_B_2, var & 1);
             Ports_SetPin(Port_B_11, var & 2);
             var++;
             
             memcpy_inverse(&avg_res_volt_buff[0], &avg_res_volt_buff[1], sizeof(avg_res_volt_buff) - sizeof(avg_res_volt_buff[0]));
-            avg_res_volt_buff[0] = resistorVoltage;
+            avg_res_volt_buff[0] = curr_res_volt;
             
             memcpy_inverse(&avg_src_vol_buff[0], &avg_src_vol_buff[1], sizeof(avg_src_vol_buff) - sizeof(avg_src_vol_buff[0]));
-            avg_src_vol_buff[0] = EMC1701_Driver_GetSrcVolt();
+            avg_src_vol_buff[0] = curr_src_volt;
             
             avg_res_volt = 0;
             for(t = 0; t < (sizeof(avg_res_volt_buff)/sizeof(avg_res_volt_buff[0])); t++)
@@ -193,6 +172,7 @@ void main(void)
                     MainState = MainState_Init_MeasureOffset;
                     break;
                 case MainState_Init_MeasureOffset:
+                    DisplayLayout_Init(var);
                     if(var >= 200)
                     {
                         res_volt_offset = avg_res_volt;
@@ -205,161 +185,14 @@ void main(void)
                     MainState = MainState_Measuring;
                     break;
                 case MainState_Measuring:
-                    resistorVoltage -= res_volt_offset;
+                    curr_res_volt -= res_volt_offset;
+                    curr_src_volt -= src_volt_offset;
                     avg_res_volt -= res_volt_offset;
                     avg_src_volt -= src_volt_offset;
+                    DisplayLayout_Measurement(EMC1701_Driver_GetRange(), curr_res_volt, avg_res_volt, curr_src_volt, avg_src_volt);
                     break;
             }
-            
-            if(OLED_Driver_Running() != 0)
-            {
-                uint8 len = 0;
-                uint8 tab_cntr = 0;
-                uint8 last_lf_pos = 0;
-                uint8 t = 0;
-                int32 current           = divS32byS16toS32(resistorVoltage, 2000);
-                int32 avg_current       = divS32byS16toS32(avg_res_volt, 2000);
-                uint16 src_voltage      = divU32byU16toU16(EMC1701_Driver_GetSrcVolt(), 10u);
-                uint16 avg_src_voltage  = divU32byU16toU16(avg_src_volt, 10u);
-                int32 power             = divS32byS16toS32(current * src_voltage, 10000u);
-                int32 avg_power         = divS32byS16toS32(avg_current * avg_src_voltage, 10000u);
-                
-                line[len++] = 'R';
-                line[len++] = 'a';
-                line[len++] = 'n';
-                line[len++] = 'g';
-                line[len++] = 'e';
-                line[len++] = ':';
-                len += Dabler16Bit(EMC1701_Driver_GetRange(), &line[len]);
-                line[len++] = ' ';
-                line[len++] = 'm';
-                line[len++] = 'V';
-                line[len++] = '\n';
-                line[len++] = '\n';
-                last_lf_pos = len-1;
-                
-                /* adding src voltage */
-                Dabler16Bit(src_voltage-src_volt_offset, &line[len]);
-                len += ExtendString(&line[len], '0', 5);
-                InsertChar(line, ',', len-3);
-                len++;
-                line[len++] = ' ';
-                line[len++] = 'V';
-                while(len < (last_lf_pos + AVG_VALUES_POSITION))
-                {
-                    line[len++] = ' ';
-                }
-                
-                Dabler16Bit(avg_src_voltage, &line[len]);
-                len += ExtendString(&line[len], '0', 5);
-                InsertChar(line, ',', len-3);
-                len++;
-                line[len++] = ' ';
-                line[len++] = 'V';
-                
-                line[len++] = '\n';
-                line[len++] = '\n';
-                last_lf_pos = len-1;
-                
-                /* adding current */
-                if(current < 0)
-                {
-                    line[len++] = '-';
-                    current *= -1;
-                }
-                t = Dabler16Bit(current, &line[len]);
-                if(t == 1)
-                {
-                    len += ExtendString(&line[len], '0', 2);
-                }
-                else
-                {
-                    len += t;
-                }
-                
-                InsertChar(&line[0], ',', len-1);
-                len++;
-                line[len++] = ' ';
-                line[len++] = 'm';
-                line[len++] = 'A';
-                while(len < (last_lf_pos + AVG_VALUES_POSITION))
-                {
-                    line[len++] = ' ';
-                }
-                if(avg_current < 0)
-                {
-                    line[len++] = '-';
-                    avg_current *= -1;
-                }
-                t = Dabler16Bit(avg_current, &line[len]);
-                if(t == 1)
-                {
-                    len += ExtendString(&line[len], '0', 2);
-                }
-                else
-                {
-                    len += t;
-                }
-                InsertChar(&line[0], ',', len-1);
-                len++;
-                line[len++] = ' ';
-                line[len++] = 'm';
-                line[len++] = 'A';
-                line[len++] = '\n';
-                line[len++] = '\n';
-                last_lf_pos = len-1;
-                
-                /* adding power */
-                if(power < 0)
-                {
-                    line[len++] = '-';
-                    power *= -1;
-                }
-                t = Dabler16Bit(power, &line[len]);
-                if(t < 4)
-                {
-                    len += ExtendString(&line[len], '0', 4);
-                }
-                else
-                {
-                    len += t;
-                }
-                InsertChar(&line[0], ',', len-3);
-                len++;
-                line[len++] = ' ';
-                line[len++] = 'W';
-                
-                /* adding average power */
-                while(len < (last_lf_pos + AVG_VALUES_POSITION))
-                {
-                    line[len++] = ' ';
-                }
-                if(avg_power < 0)
-                {
-                    line[len++] = '-';
-                    avg_power *= -1;
-                }
-                t = Dabler16Bit(avg_power, &line[len]);
-                if(t < 4)
-                {
-                    len += ExtendString(&line[len], '0', 4);
-                }
-                else
-                {
-                    len += t;
-                }
-                InsertChar(&line[0], ',', len-3);
-                len++;
-                line[len++] = ' ';
-                line[len++] = 'W';
-                line[len++] = '\n';
-                line[len++] = '\n';
-                
-                Dabler16Bit(var, &line[len]);
-                len += ExtendString(&line[len], '0', 6);
-                line[len++] = 0;
-                OLED_Driver_PutString(line);
-            }
+            var++;
         }
     }
 }

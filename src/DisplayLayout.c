@@ -173,28 +173,41 @@ void DisplayLayout_Measurement(uint8 range, int32 currResVolt, int32 avgResVolt,
     OLED_Driver_PutString(line);
 }
 
-void DisplayLayout_Init(uint8 point_pos)
+void DisplayLayout_Init(int32 res_offset)
 {
     uint8 line[32];
-    uint8 len = 12;
+    uint8 len = 7;
+    uint8 t = 0;
     
-    line[0] = 'I';
-    line[1] = 'n';
-    line[2] = 'i';
-    line[3] = 't';
-    line[4] = 'i';
-    line[5] = 'a';
-    line[6] = 'l';
-    line[7] = 'i';
-    line[8] = 'z';
-    line[9] = 'i';
-    line[10] = 'n';
-    line[11] = 'g';
-    point_pos &= 7;
-    for(len = 12; len < (12 + point_pos); len++)
+    int32 current           = divS32byS16toS32(res_offset, 2000);
+    
+    line[0] = 'O';
+    line[1] = 'f';
+    line[2] = 'f';
+    line[3] = 's';
+    line[4] = 'e';
+    line[5] = 't';
+    line[6] = ':';
+    if(current < 0)
     {
-        line[len] = '.';
+        line[len++] = '-';
+        current *= -1;
     }
+    t = Dabler16Bit(current, &line[len]);
+    if(t == 1)
+    {
+        len += ExtendString(&line[len], '0', 2);
+    }
+    else
+    {
+        len += t;
+    }
+    InsertChar(&line[0], ',', len-1);
+    len++;
+    line[len++] = ' ';
+    line[len++] = 'm';
+    line[len++] = 'A';
+    line[len++] = '\n';
     
     line[len++] = 0;
     OLED_Driver_PutString(line);

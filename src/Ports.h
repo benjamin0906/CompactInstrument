@@ -109,6 +109,7 @@ extern void Ports_SetMode(dtPort_pin pin, dtPort_mode mode);
 extern void Ports_SetPin(dtPort_pin pin, uint8 value);
 extern void Ports_ConfigOutputSelection(uint8 remap_id, dtOutFuncs func);
 extern void Ports_ConfigInputSelection(uint8 remap_id, dtInFuncs func);
+extern uint8 Ports_GetPin(dtPort_pin pin);
 
 #endif	/* PORTS_H */
 

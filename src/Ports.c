@@ -52,3 +52,10 @@ void Ports_SetPin(dtPort_pin pin, uint8 value)
     tLat |= (value != 0) << pin_pos;
     PORTS->P[port].LAT = tLat;
 }
+
+uint8 Ports_GetPin(dtPort_pin pin)
+{
+    uint8 port = pin >> 4;
+    uint8 pin_pos = (pin & 0x0F);
+    return (PORTS->P[port].PORT & (1 << pin_pos)) != 0;
+}

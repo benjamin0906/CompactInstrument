@@ -51,17 +51,17 @@ OBJECTDIR=build/${CND_CONF}/${IMAGE_TYPE}
 DISTDIR=dist/${CND_CONF}/${IMAGE_TYPE}
 
 # Source Files Quoted if spaced
-SOURCEFILES_QUOTED_IF_SPACED=src/main.c src/Ports.c src/ISR.c src/T1.c src/SRC.c src/I2C.c src/EMC1701_Driver.c src/SPI.c src/OLED_Driver.c src/AsmFunctions.s src/DisplayLayout.c
+SOURCEFILES_QUOTED_IF_SPACED=src/main.c src/Ports.c src/ISR.c src/T1.c src/SRC.c src/I2C.c src/EMC1701_Driver.c src/SPI.c src/OLED_Driver.c src/AsmFunctions.s src/DisplayLayout.c src/ButtonHandler.c
 
 # Object Files Quoted if spaced
-OBJECTFILES_QUOTED_IF_SPACED=${OBJECTDIR}/src/main.o ${OBJECTDIR}/src/Ports.o ${OBJECTDIR}/src/ISR.o ${OBJECTDIR}/src/T1.o ${OBJECTDIR}/src/SRC.o ${OBJECTDIR}/src/I2C.o ${OBJECTDIR}/src/EMC1701_Driver.o ${OBJECTDIR}/src/SPI.o ${OBJECTDIR}/src/OLED_Driver.o ${OBJECTDIR}/src/AsmFunctions.o ${OBJECTDIR}/src/DisplayLayout.o
-POSSIBLE_DEPFILES=${OBJECTDIR}/src/main.o.d ${OBJECTDIR}/src/Ports.o.d ${OBJECTDIR}/src/ISR.o.d ${OBJECTDIR}/src/T1.o.d ${OBJECTDIR}/src/SRC.o.d ${OBJECTDIR}/src/I2C.o.d ${OBJECTDIR}/src/EMC1701_Driver.o.d ${OBJECTDIR}/src/SPI.o.d ${OBJECTDIR}/src/OLED_Driver.o.d ${OBJECTDIR}/src/AsmFunctions.o.d ${OBJECTDIR}/src/DisplayLayout.o.d
+OBJECTFILES_QUOTED_IF_SPACED=${OBJECTDIR}/src/main.o ${OBJECTDIR}/src/Ports.o ${OBJECTDIR}/src/ISR.o ${OBJECTDIR}/src/T1.o ${OBJECTDIR}/src/SRC.o ${OBJECTDIR}/src/I2C.o ${OBJECTDIR}/src/EMC1701_Driver.o ${OBJECTDIR}/src/SPI.o ${OBJECTDIR}/src/OLED_Driver.o ${OBJECTDIR}/src/AsmFunctions.o ${OBJECTDIR}/src/DisplayLayout.o ${OBJECTDIR}/src/ButtonHandler.o
+POSSIBLE_DEPFILES=${OBJECTDIR}/src/main.o.d ${OBJECTDIR}/src/Ports.o.d ${OBJECTDIR}/src/ISR.o.d ${OBJECTDIR}/src/T1.o.d ${OBJECTDIR}/src/SRC.o.d ${OBJECTDIR}/src/I2C.o.d ${OBJECTDIR}/src/EMC1701_Driver.o.d ${OBJECTDIR}/src/SPI.o.d ${OBJECTDIR}/src/OLED_Driver.o.d ${OBJECTDIR}/src/AsmFunctions.o.d ${OBJECTDIR}/src/DisplayLayout.o.d ${OBJECTDIR}/src/ButtonHandler.o.d
 
 # Object Files
-OBJECTFILES=${OBJECTDIR}/src/main.o ${OBJECTDIR}/src/Ports.o ${OBJECTDIR}/src/ISR.o ${OBJECTDIR}/src/T1.o ${OBJECTDIR}/src/SRC.o ${OBJECTDIR}/src/I2C.o ${OBJECTDIR}/src/EMC1701_Driver.o ${OBJECTDIR}/src/SPI.o ${OBJECTDIR}/src/OLED_Driver.o ${OBJECTDIR}/src/AsmFunctions.o ${OBJECTDIR}/src/DisplayLayout.o
+OBJECTFILES=${OBJECTDIR}/src/main.o ${OBJECTDIR}/src/Ports.o ${OBJECTDIR}/src/ISR.o ${OBJECTDIR}/src/T1.o ${OBJECTDIR}/src/SRC.o ${OBJECTDIR}/src/I2C.o ${OBJECTDIR}/src/EMC1701_Driver.o ${OBJECTDIR}/src/SPI.o ${OBJECTDIR}/src/OLED_Driver.o ${OBJECTDIR}/src/AsmFunctions.o ${OBJECTDIR}/src/DisplayLayout.o ${OBJECTDIR}/src/ButtonHandler.o
 
 # Source Files
-SOURCEFILES=src/main.c src/Ports.c src/ISR.c src/T1.c src/SRC.c src/I2C.c src/EMC1701_Driver.c src/SPI.c src/OLED_Driver.c src/AsmFunctions.s src/DisplayLayout.c
+SOURCEFILES=src/main.c src/Ports.c src/ISR.c src/T1.c src/SRC.c src/I2C.c src/EMC1701_Driver.c src/SPI.c src/OLED_Driver.c src/AsmFunctions.s src/DisplayLayout.c src/ButtonHandler.c
 
 
 
@@ -149,6 +149,12 @@ ${OBJECTDIR}/src/DisplayLayout.o: src/DisplayLayout.c  .generated_files/flags/de
 	@${RM} ${OBJECTDIR}/src/DisplayLayout.o 
 	${MP_CC} $(MP_EXTRA_CC_PRE)  src/DisplayLayout.c  -o ${OBJECTDIR}/src/DisplayLayout.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MP -MMD -MF "${OBJECTDIR}/src/DisplayLayout.o.d"      -g -D__DEBUG -D__MPLAB_DEBUGGER_PK3=1  -mno-eds-warn  -omf=elf -save-temps=obj -DXPRJ_default=$(CND_CONF)    $(COMPARISON_BUILD)  -O0 -msmart-io=1 -Wall -msfr-warn=off    -mdfp="${DFP_DIR}/xc16"
 	
+${OBJECTDIR}/src/ButtonHandler.o: src/ButtonHandler.c  .generated_files/flags/default/177f4f757957cb51fc907430b1452cffd9c312c0 .generated_files/flags/default/da39a3ee5e6b4b0d3255bfef95601890afd80709
+	@${MKDIR} "${OBJECTDIR}/src" 
+	@${RM} ${OBJECTDIR}/src/ButtonHandler.o.d 
+	@${RM} ${OBJECTDIR}/src/ButtonHandler.o 
+	${MP_CC} $(MP_EXTRA_CC_PRE)  src/ButtonHandler.c  -o ${OBJECTDIR}/src/ButtonHandler.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MP -MMD -MF "${OBJECTDIR}/src/ButtonHandler.o.d"      -g -D__DEBUG -D__MPLAB_DEBUGGER_PK3=1  -mno-eds-warn  -omf=elf -save-temps=obj -DXPRJ_default=$(CND_CONF)    $(COMPARISON_BUILD)  -O0 -msmart-io=1 -Wall -msfr-warn=off    -mdfp="${DFP_DIR}/xc16"
+	
 else
 ${OBJECTDIR}/src/main.o: src/main.c  .generated_files/flags/default/28ed5cbcc8b8eda3144f589bec324369aa5e3366 .generated_files/flags/default/da39a3ee5e6b4b0d3255bfef95601890afd80709
 	@${MKDIR} "${OBJECTDIR}/src" 
@@ -209,6 +215,12 @@ ${OBJECTDIR}/src/DisplayLayout.o: src/DisplayLayout.c  .generated_files/flags/de
 	@${RM} ${OBJECTDIR}/src/DisplayLayout.o.d 
 	@${RM} ${OBJECTDIR}/src/DisplayLayout.o 
 	${MP_CC} $(MP_EXTRA_CC_PRE)  src/DisplayLayout.c  -o ${OBJECTDIR}/src/DisplayLayout.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MP -MMD -MF "${OBJECTDIR}/src/DisplayLayout.o.d"      -mno-eds-warn  -g -omf=elf -save-temps=obj -DXPRJ_default=$(CND_CONF)    $(COMPARISON_BUILD)  -O0 -msmart-io=1 -Wall -msfr-warn=off    -mdfp="${DFP_DIR}/xc16"
+	
+${OBJECTDIR}/src/ButtonHandler.o: src/ButtonHandler.c  .generated_files/flags/default/5b07ccccb344b89c48f424a14a64bb9bf6ac34a1 .generated_files/flags/default/da39a3ee5e6b4b0d3255bfef95601890afd80709
+	@${MKDIR} "${OBJECTDIR}/src" 
+	@${RM} ${OBJECTDIR}/src/ButtonHandler.o.d 
+	@${RM} ${OBJECTDIR}/src/ButtonHandler.o 
+	${MP_CC} $(MP_EXTRA_CC_PRE)  src/ButtonHandler.c  -o ${OBJECTDIR}/src/ButtonHandler.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MP -MMD -MF "${OBJECTDIR}/src/ButtonHandler.o.d"      -mno-eds-warn  -g -omf=elf -save-temps=obj -DXPRJ_default=$(CND_CONF)    $(COMPARISON_BUILD)  -O0 -msmart-io=1 -Wall -msfr-warn=off    -mdfp="${DFP_DIR}/xc16"
 	
 endif
 

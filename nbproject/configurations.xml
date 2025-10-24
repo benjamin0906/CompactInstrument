@@ -48,6 +48,8 @@
       <itemPath>src/main.h</itemPath>
       <itemPath>src/DisplayLayout.c</itemPath>
       <itemPath>src/DisplayLayout.h</itemPath>
+      <itemPath>src/ButtonHandler.c</itemPath>
+      <itemPath>src/ButtonHandler.h</itemPath>
     </logicalFolder>
   </logicalFolder>
   <projectmakefile>Makefile</projectmakefile>
@@ -261,6 +263,7 @@
         <property key="event.recorder.debugger.behavior" value="Running"/>
         <property key="event.recorder.enabled" value="false"/>
         <property key="event.recorder.scvd.files" value=""/>
+        <property key="firmware.download.all" value="false"/>
         <property key="hwtoolclock.frcindebug" value="false"/>
         <property key="lastid" value=""/>
         <property key="memories.aux" value="false"/>

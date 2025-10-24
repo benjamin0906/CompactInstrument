@@ -20,6 +20,7 @@
 #include "EMC1701_Driver.h"
 #include "AsmFunctions.h"
 #include "DisplayLayout.h"
+#include "ButtonHandler.h"
 
 #pragma config FNOSC = FRC              // Oscillator Source Selection (Internal Fast RC (FRC))
 #pragma config IESO = OFF               // Two-speed Oscillator Start-up Enable bit (Start up with user-selected oscillator source)
@@ -44,7 +45,6 @@ typedef enum eMainStates
 {
     MainState_Init_Off,
             MainState_Init_MeasureOffset,
-            MainState_Init_On,
             MainState_Measuring,
 } dtMainStates;
 
@@ -92,6 +92,7 @@ void main(void)
     Ports_SetMode(Port_B_15, Port_DO);
     Ports_SetPin(Port_B_8, 0);
     Ports_SetPin(Port_B_15, 1);
+    Ports_SetMode(Port_A_1, Port_DI);
     
     Ports_SetMode(Port_B_11, Port_DO);
     Ports_SetMode(Port_B_2, Port_DO);
@@ -104,6 +105,7 @@ void main(void)
     Ports_SetMode(Port_B_13, Port_DO);
     Ports_SetMode(Port_B_14, Port_DO);
     Ports_SetMode(SENSE_ENABLE, Port_DO);
+    Ports_SetPin(SENSE_ENABLE, 0);
     Ports_ConfigOutputSelection(44, Ports_OutFun_SCK1);
     Ports_ConfigInputSelection(44, Ports_InFun_SCK1IN);
     Ports_ConfigOutputSelection(45, Ports_OutFun_SDO1);
@@ -130,10 +132,22 @@ void main(void)
     int32 res_volt_offset = 0;
     uint32 src_volt_offset = 0;
     
+    memset(avg_res_volt_buff, 0, sizeof(avg_res_volt_buff));
+    memset(avg_src_vol_buff, 0, sizeof(avg_src_vol_buff));
+    
     while(1)
     {
         OLED_Driver_Runnable();
         EMC1701_Driver_Runnable();
+        ButtonHandler_Runnable();
+        if(ButtonHandler_GetButton() != 0)
+        {
+            Ports_SetPin(Port_B_11, 1);
+        }
+        else
+        {
+            Ports_SetPin(Port_B_11, 0);
+        }
         if(TimePassed(ts, 50) != 0)
         {
             int32 avg_res_volt = 0;
@@ -143,9 +157,7 @@ void main(void)
             uint8 t = 0;
             ts = SysTime();
             Ports_SetPin(Port_B_2, var & 1);
-            Ports_SetPin(Port_B_11, var & 2);
-            var++;
-            
+                 
             memcpy_inverse(&avg_res_volt_buff[0], &avg_res_volt_buff[1], sizeof(avg_res_volt_buff) - sizeof(avg_res_volt_buff[0]));
             avg_res_volt_buff[0] = curr_res_volt;
             
@@ -168,28 +180,26 @@ void main(void)
             switch(MainState)
             {
                 case MainState_Init_Off:
-                    Ports_SetPin(SENSE_ENABLE, 0);
-                    MainState = MainState_Init_MeasureOffset;
-                    break;
-                case MainState_Init_MeasureOffset:
-                    DisplayLayout_Init(var);
-                    if(var >= 200)
-                    {
-                        res_volt_offset = avg_res_volt;
-                        src_volt_offset = avg_src_volt;
-                        MainState = MainState_Init_On;
-                    }
-                    break;
-                case MainState_Init_On:
                     Ports_SetPin(SENSE_ENABLE, 1);
                     MainState = MainState_Measuring;
                     break;
+                case MainState_Init_MeasureOffset:
+                    DisplayLayout_Init(avg_res_volt);
+                    if(ButtonHandler_GetButton() == 0)
+                    {
+                        res_volt_offset = avg_res_volt;
+                        MainState = MainState_Measuring;
+                        //Ports_SetPin(SENSE_ENABLE, 1);
+                    }
+                    break;
                 case MainState_Measuring:
                     curr_res_volt -= res_volt_offset;
-                    curr_src_volt -= src_volt_offset;
                     avg_res_volt -= res_volt_offset;
-                    avg_src_volt -= src_volt_offset;
                     DisplayLayout_Measurement(EMC1701_Driver_GetRange(), curr_res_volt, avg_res_volt, curr_src_volt, avg_src_volt);
+                    if(ButtonHandler_GetButton() >= 80)
+                    {
+                        MainState = MainState_Init_MeasureOffset;
+                    }
                     break;
             }
             var++;

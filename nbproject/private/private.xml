@@ -6,10 +6,9 @@
             <file>file:/C:/Users/Benjamin/MPLABXProjects/CompactInstrument.X/src/main.c</file>
             <file>file:/C:/Users/Benjamin/MPLABXProjects/CompactInstrument.X/src/DisplayLayout.h</file>
             <file>file:/C:/Users/Benjamin/MPLABXProjects/CompactInstrument.X/src/OLED_Driver.c</file>
-            <file>file:/C:/Users/Benjamin/MPLABXProjects/CompactInstrument.X/src/ButtonHandler.c</file>
             <file>file:/C:/Users/Benjamin/MPLABXProjects/CompactInstrument.X/src/EMC1701_Driver.c</file>
-            <file>file:/C:/Users/Benjamin/MPLABXProjects/CompactInstrument.X/src/main.h</file>
             <file>file:/C:/Users/Benjamin/MPLABXProjects/CompactInstrument.X/src/DisplayLayout.c</file>
+            <file>file:/C:/Users/Benjamin/MPLABXProjects/CompactInstrument.X/src/AsmFunctions.h</file>
         </group>
     </open-files>
 </project-private>

@@ -25,18 +25,12 @@ void InsertChar(uint8 *string, uint8 character, uint8 position)
     string[position] = character;
 }
 
-void DisplayLayout_Measurement(uint8 range, int32 currResVolt, int32 avgResVolt, uint32 CurrSrcVolt, uint32 avgSrcVolt)
+void DisplayLayout_Measurement(uint8 range, int32 curr_current, int32 avg_current, uint32 curr_src_volt, uint32 avg_src_volt, int32 curr_power, int32 avg_power)
 {
     uint8 line[120];
     uint8 len = 0;
     uint8 last_lf_pos = 0;
     uint8 t = 0;
-    int32 current           = divS32byS16toS32(currResVolt, 2000);
-    int32 avg_current       = divS32byS16toS32(avgResVolt, 2000);
-    uint16 src_voltage      = divU32byU16toU16(CurrSrcVolt, 10u);
-    uint16 avg_src_voltage  = divU32byU16toU16(avgSrcVolt, 10u);
-    int32 power             = divS32byS16toS32(current * src_voltage, 10000u);
-    int32 avg_power         = divS32byS16toS32(avg_current * avg_src_voltage, 10000u);
 
     line[len++] = 'R';
     line[len++] = 'a';
@@ -53,7 +47,7 @@ void DisplayLayout_Measurement(uint8 range, int32 currResVolt, int32 avgResVolt,
     last_lf_pos = len-1;
 
     /* adding src voltage */
-    Dabler16Bit(src_voltage, &line[len]);
+    Dabler16Bit(curr_src_volt, &line[len]);
     len += ExtendString(&line[len], '0', 5);
     InsertChar(line, ',', len-3);
     len++;
@@ -64,7 +58,7 @@ void DisplayLayout_Measurement(uint8 range, int32 currResVolt, int32 avgResVolt,
         line[len++] = ' ';
     }
 
-    Dabler16Bit(avg_src_voltage, &line[len]);
+    Dabler16Bit(avg_src_volt, &line[len]);
     len += ExtendString(&line[len], '0', 5);
     InsertChar(line, ',', len-3);
     len++;
@@ -76,12 +70,12 @@ void DisplayLayout_Measurement(uint8 range, int32 currResVolt, int32 avgResVolt,
     last_lf_pos = len-1;
 
     /* adding current */
-    if(current < 0)
+    if(curr_current < 0)
     {
         line[len++] = '-';
-        current *= -1;
+        curr_current *= -1;
     }
-    t = Dabler16Bit(current, &line[len]);
+    t = Dabler16Bit(curr_current, &line[len]);
     if(t == 1)
     {
         len += ExtendString(&line[len], '0', 2);
@@ -124,12 +118,12 @@ void DisplayLayout_Measurement(uint8 range, int32 currResVolt, int32 avgResVolt,
     last_lf_pos = len-1;
 
     /* adding power */
-    if(power < 0)
+    if(curr_power < 0)
     {
         line[len++] = '-';
-        power *= -1;
+        curr_power *= -1;
     }
-    t = Dabler16Bit(power, &line[len]);
+    t = Dabler16Bit(curr_power, &line[len]);
     if(t < 4)
     {
         len += ExtendString(&line[len], '0', 4);

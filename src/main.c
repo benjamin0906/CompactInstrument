@@ -130,7 +130,6 @@ void main(void)
     int32 avg_res_volt_buff[20] = {0,0,0,0,0,0,0,0,0,0};
     uint32 avg_src_vol_buff[20] = {0,0,0,0,0,0,0,0,0,0};
     int32 res_volt_offset = 0;
-    uint32 src_volt_offset = 0;
     
     memset(avg_res_volt_buff, 0, sizeof(avg_res_volt_buff));
     memset(avg_src_vol_buff, 0, sizeof(avg_src_vol_buff));
@@ -154,6 +153,10 @@ void main(void)
             uint32 avg_src_volt = 0;
             int32 curr_res_volt = EMC1701_Driver_GetResVolt();
             uint32 curr_src_volt = EMC1701_Driver_GetSrcVolt();
+            int32 curr_current;
+            int32 avg_current;
+            int32 curr_power;
+            int32 avg_power;
             uint8 t = 0;
             ts = SysTime();
             Ports_SetPin(Port_B_2, var & 1);
@@ -177,6 +180,17 @@ void main(void)
             }
             avg_src_volt = divS32byS16toS32(avg_src_volt, (sizeof(avg_src_vol_buff)/sizeof(avg_src_vol_buff[0])));
             
+            
+            curr_res_volt -= res_volt_offset;
+            avg_res_volt -= res_volt_offset;
+            
+            curr_src_volt = divU32byU16toU16(curr_src_volt, 10u);
+            avg_src_volt = divU32byU16toU16(avg_src_volt, 10u);
+            curr_current= divS32byS16toS32(curr_res_volt, 2000);
+            avg_current = divS32byS16toS32(avg_res_volt, 2000);
+            curr_power  = divS32byS16toS32(curr_current * curr_src_volt, 10000u);
+            avg_power   = divS32byS16toS32(avg_current * avg_src_volt, 10000u);
+            
             switch(MainState)
             {
                 case MainState_Init_Off:
@@ -193,12 +207,11 @@ void main(void)
                     }
                     break;
                 case MainState_Measuring:
-                    curr_res_volt -= res_volt_offset;
-                    avg_res_volt -= res_volt_offset;
-                    DisplayLayout_Measurement(EMC1701_Driver_GetRange(), curr_res_volt, avg_res_volt, curr_src_volt, avg_src_volt);
+                    DisplayLayout_Measurement(EMC1701_Driver_GetRange(), curr_current, avg_current, curr_src_volt, avg_src_volt, curr_power, avg_power);
                     if(ButtonHandler_GetButton() >= 80)
                     {
                         MainState = MainState_Init_MeasureOffset;
+                        res_volt_offset = 0;
                     }
                     break;
             }

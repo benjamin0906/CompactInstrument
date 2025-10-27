@@ -239,16 +239,28 @@ uint8 EMC1701_Driver_Running(void)
     return  (EmcAfterWaitState >= EmcState_Running_WaitState) || (EmcState >= EmcState_Running_WaitState);
 }
 
+/*
+ * @brief returns with the voltage measured across the shunt resistor
+ * @retval shunt resistor voltage [nV]
+ */
 int32 EMC1701_Driver_GetResVolt(void)
 {
     return ResistorVoltage;
 }
 
+/*
+ * @brief returns with the voltage measured at the input side
+ * @retval input side voltage [100uV]
+ */
 uint32 EMC1701_Driver_GetSrcVolt(void)
 {
     return SourceVoltage;
 }
 
+/*
+ * @brief returns with the voltage range of the shunt resistor ADC
+ * @retval input side voltage [mV]
+ */
 uint8 EMC1701_Driver_GetRange(void)
 {
     return  FscRange;
